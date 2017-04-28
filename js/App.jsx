@@ -7,6 +7,7 @@ const App = React.createClass({
   getInitialState() {
     return {
       mode: 'currentView',
+      dataset: config.datasets[0],
       fields: [],
       showAbout: false,
     };
@@ -14,12 +15,15 @@ const App = React.createClass({
 
   componentDidMount() {
     const self = this;
-    $.getJSON(config.dataset.fields, (fields) => {
-      fields.forEach((field) => {
-        field.checked = false;
-      });
+    this.readFields();
+  },
 
-      self.setState({ fields });
+  readFields(callback) {
+    const { dataset } = this.state;
+
+    $.getJSON(dataset.fields, (fields) => {
+      fields.forEach((field) => field.checked = false);
+      this.setState({ fields });
     });
   },
 
@@ -55,10 +59,19 @@ const App = React.createClass({
     if (mode === 'currentView') this.setCurrentViewIntersect();
   },
 
+  handleDatasetChange(e) {
+    const datasetId = e.target.value;
+    const that = this;
+    this.setState({
+        dataset: $.grep(config.datasets, d => d.id == datasetId)[0],
+        intersect: null
+    }, this.readFields);
+  },
+
   handleDownload(type) {
-    const { intersect } = this.state;
+    const { intersect, dataset } = this.state;
     const fields = this.getFields();
-    const apiCall = `//${config.username}.carto.com/api/v2/sql?skipfields=cartodb_id,created_at,updated_at&format=${type}&filename=${config.dataset.table}&q=SELECT ${fields} FROM ${config.dataset.table} a WHERE ST_INTERSECTS(${intersect}, a.the_geom)`;
+    const apiCall = `//${config.username}.carto.com/api/v2/sql?skipfields=cartodb_id,created_at,updated_at&format=${type}&filename=${dataset.table}&q=SELECT ${fields} FROM ${dataset.table} a WHERE ST_INTERSECTS(${intersect}, a.the_geom)`;
 
     console.log(`Calling SQL API: ${apiCall}`); // eslint-disable-line
     window.open(apiCall, 'Download');
@@ -102,7 +115,7 @@ const App = React.createClass({
   },
 
   render() {
-    const { mode, fields, showAbout } = this.state;
+    const { mode, fields, showAbout, dataset } = this.state;
 
     return (
       <div>
@@ -110,12 +123,15 @@ const App = React.createClass({
           mode={mode}
           onBoundsChange={this.handleBoundsChange}
           onUpdateIntersect={this.handleUpdateIntersect}
+          dataset={dataset}
         />
         <Sidebar
           fields={fields}
           mode={mode}
+          dataset={dataset}
           intersect={this.state.intersect}
           onModeChange={this.handleModeChange}
+          onDatasetChange={this.handleDatasetChange}
           onDownload={this.handleDownload}
           onFieldChange={this.handleFieldChange}
           onSelectAll={this.handleSelectAll}

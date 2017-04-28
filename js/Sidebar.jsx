@@ -9,17 +9,20 @@ window.Sidebar = React.createClass({
     fields: React.PropTypes.array.isRequired,
     intersect: React.PropTypes.string.isRequired,
     onModeChange: React.PropTypes.func.isRequired,
+    onDatasetChange: React.PropTypes.func.isRequired,
     onDownload: React.PropTypes.func.isRequired,
     onFieldChange: React.PropTypes.func.isRequired,
     onSelectAll: React.PropTypes.func.isRequired,
     onSelectNone: React.PropTypes.func.isRequired,
+    dataset: React.PropTypes.shape({})
   },
 
 
   render() {
-    const { mode, fields, intersect, onModeChange, onDownload, onFieldChange, onSelectAll, onSelectNone } = this.props;
+    const { mode, dataset, fields, intersect, onModeChange, onDatasetChange, onDownload, onFieldChange, onSelectAll, onSelectNone } = this.props;
 
     const disabled = intersect === null ? 'disabled' : '';
+    const isMultipleDataset = config.datasets.length > 1;
 
     let downloadMessage = '';
 
@@ -46,15 +49,43 @@ window.Sidebar = React.createClass({
         }
       </li>
     ));
-
     return (
       <div id="sidebar">
         <div className="List-blocks">
+          { isMultipleDataset &&
+            <div
+              className="u-vspace-xxl"
+            >
+              <div className="u-vspace-l">
+                <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">1</span>
+                <h2 className="u-iblock u-malign"><strong>Choose Dataset</strong></h2>
+              </div>
+              <ul className="ListOptions u-vspace-xxl">
+                {
+                  config.datasets.map(d =>(
+                    <li>
+                      <label>
+                        <input
+                          className="u-iblock u-malign"
+                          type="radio"
+                          value={d.id}
+                          checked={dataset.id === d.id}
+                          onChange={onDatasetChange}
+                        />
+                        <p className="u-iblock u-malign">{d.text.default}</p>
+                      </label>
+                    </li>)
+                  )
+                }
+              </ul>
+            </div>
+          }
+
           <div
             className="u-vspace-xxl"
           >
             <div className="u-vspace-l">
-              <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">1</span>
+              <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">{isMultipleDataset ? 2 : 1}</span>
               <h2 className="u-iblock u-malign"><strong>Choose Area</strong></h2>
             </div>
 
@@ -105,7 +136,7 @@ window.Sidebar = React.createClass({
           <div className="u-vspace-xxl columns-pane" style={{ width: 'calc(100% - 32px)' }}>
             <div className="u-vspace-l clearfix">
               <div className="u-left">
-                <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">2</span> <h2 className="u-iblock u-malign"><strong>Choose Columns</strong></h2>
+                <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">{isMultipleDataset ? 3 : 2}</span> <h2 className="u-iblock u-malign"><strong>Choose Columns</strong></h2>
               </div>
               <p className="u-right"><a href="#" onClick={onSelectAll}>All</a> | <a href="#" onClick={onSelectNone}>None</a></p>
             </div>
@@ -124,7 +155,7 @@ window.Sidebar = React.createClass({
 
           <div className="download-pane">
             <div className="u-vspace-l">
-              <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">3</span>
+              <span className="Number-circle u-txt-center fill fill-dark color-white u-iblock u-malign">{isMultipleDataset ? 4 : 3}</span>
               <h2 className="u-iblock u-malign"><strong>Download!</strong></h2> <p>{downloadMessage}</p>
             </div>
             <ul className="u-ilist u-vspace-xxl">
