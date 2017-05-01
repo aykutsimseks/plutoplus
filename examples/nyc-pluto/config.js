@@ -16,11 +16,13 @@ window.config = {
   // Carto username
   username: 'cwhong',
   // Main Vis/Dataset
-  dataset: {
-    table: 'pluto16v2',
-    fields: 'examples/nyc-pluto/data/fields.json',
-    vis: '//cwhong.cartodb.com/api/v2/viz/dacf834a-2fa8-11e5-886f-0e4fddd5de28/viz.json',
-  },
+  datasets: [
+    {
+      table: 'pluto16v2',
+      fields: 'examples/nyc-pluto/data/fields.json',
+      vis: '//cwhong.cartodb.com/api/v2/viz/dacf834a-2fa8-11e5-886f-0e4fddd5de28/viz.json',
+    }
+  ],
   // Overlay/Select Areas
   areas: [
     {

@@ -15,6 +15,7 @@ window.Map = React.createClass({
     onBoundsChange: React.PropTypes.func.isRequired,
     onUpdateIntersect: React.PropTypes.func.isRequired,
     mode: React.PropTypes.string.isRequired,
+    dataset: React.PropTypes.shape({})
   },
 
   componentDidMount() {
@@ -22,7 +23,11 @@ window.Map = React.createClass({
   },
 
   componentDidUpdate(prevProps) {
-    const { mode } = this.props;
+    const { mode, dataset } = this.props;
+
+    if (dataset.id !== prevProps.dataset.id) {
+      this.initializeMap();
+    }
 
     if (mode !== prevProps.mode) {
       this.selectLayer.clearLayers();
@@ -52,9 +57,20 @@ window.Map = React.createClass({
   },
 
   initializeMap() {
-    this.map = new L.Map('map', config.map);
+    if (this.map) {
+      // Clear added layers
+      this.map.eachLayer(layer => {
+        if($.grep(config.map.layers, l => l._url == layer._url).length == 0) {
+          this.map.removeLayer(layer)
+        }
+      });
+    } else {
+      this.map = new L.Map('map', config.map);
+      this.initializeDrawControls();
+    }
 
     const { map } = this;
+    const { dataset } = this.props;
 
     this.handleMoveEnd();
     map.on('moveend', this.handleMoveEnd);
@@ -63,7 +79,7 @@ window.Map = React.createClass({
 
     this.layers = [];
 
-    cartodb.createLayer(map, config.dataset.vis)
+    cartodb.createLayer(map, dataset.vis)
       .addTo(map)
       .on('done', (layer) => {
         const that = this;
@@ -122,6 +138,10 @@ window.Map = React.createClass({
           this.layers.push(sublayer);
         }
       });
+  },
+
+  initializeDrawControls() {
+    const { map } = this;
 
     const drawOptions = {
       position: 'topright',
