@@ -66,6 +66,7 @@ window.Map = React.createClass({
       });
     } else {
       this.map = new L.Map('map', config.map);
+      this.initializeDrawControls();
     }
 
     const { map } = this;
@@ -137,6 +138,10 @@ window.Map = React.createClass({
           this.layers.push(sublayer);
         }
       });
+  },
+
+  initializeDrawControls() {
+    const { map } = this;
 
     const drawOptions = {
       position: 'topright',
